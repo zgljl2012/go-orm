@@ -2,9 +2,10 @@ package fields
 
 import "orm"
 
-// IntField int field
-type intField struct {
+// Field int field
+type myField struct {
 	name    string
+	_type   string
 	options *FieldOptions
 }
 
@@ -16,17 +17,18 @@ func NewIntField(name string, opts ...FieldOption) orm.Field {
 		o(&options)
 	}
 
-	return &intField{
+	return &myField{
 		name:    name,
+		_type:   "INT",
 		options: &options,
 	}
 }
 
 // Type return type
-func (f *intField) Type() string {
-	return "INT"
+func (f *myField) Type() string {
+	return f._type
 }
 
-func (f *intField) Name() string {
+func (f *myField) Name() string {
 	return f.name
 }

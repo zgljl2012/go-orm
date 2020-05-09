@@ -70,5 +70,6 @@ func (t *simpleTable) Create(skipIfExists bool) error {
 }
 
 func (t *simpleTable) Name() string {
-	return "user"
+	name := reflect.TypeOf(reflect.Indirect(reflect.ValueOf(t.table)).Interface()).Name()
+	return name
 }
