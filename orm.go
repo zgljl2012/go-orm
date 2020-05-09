@@ -2,8 +2,9 @@ package orm
 
 // Field field interface
 type Field interface {
-	Name() string // name
-	Type() string // the type of this field, e.g. int, float
+	Name() string     // name
+	Type() string     // the type of this field, e.g. int, float
+	PrimaryKey() bool // primary key
 }
 
 // Table table

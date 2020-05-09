@@ -32,3 +32,7 @@ func (f *myField) Type() string {
 func (f *myField) Name() string {
 	return f.name
 }
+
+func (f *myField) PrimaryKey() bool {
+	return f.options.PrimaryKey
+}

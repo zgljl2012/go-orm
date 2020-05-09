@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"orm"
 	"reflect"
+	"strings"
 
 	log "github.com/zgljl2012/slog"
 )
@@ -46,6 +47,7 @@ func NewTable(db *sql.DB, table interface{}) (orm.Table, error) {
 }
 
 func (t *simpleTable) Create(skipIfExists bool) error {
+	var primaryKeys []string
 	sql := "CREATE TABLE "
 	if skipIfExists {
 		sql += " IF NOT EXISTS "
@@ -60,6 +62,15 @@ func (t *simpleTable) Create(skipIfExists bool) error {
 		if i < len(fields)-1 {
 			sql += ","
 		}
+		if field.PrimaryKey() {
+			primaryKeys = append(primaryKeys, field.Name())
+		}
+	}
+	// primary keys
+	if len(primaryKeys) > 0 {
+		sql += ", PRIMARY KEY("
+		sql += strings.Join(primaryKeys, ",")
+		sql += ")"
 	}
 	sql += `)`
 	log.Debug(sql)
