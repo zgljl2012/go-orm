@@ -28,6 +28,8 @@ type User struct {
 func (u *User) Fields() []orm.Field {
 	return []orm.Field{
 		fields.NewIntField("ID", fields.WithPrimaryKey(true)),
+		fields.NewCharField("Username", fields.WithLength(20)),
+		fields.NewCharField("Password", fields.WithLength(50)),
 	}
 }
 
@@ -106,12 +108,12 @@ func TestCreateTable(t *testing.T) {
 			},
 			"Username": {
 				"exists": false,
-				"type":   "String",
+				"type":   "CHAR(20)",
 				"pk":     false,
 			},
 			"Password": {
 				"exists": false,
-				"type":   "String",
+				"type":   "CHAR(50)",
 				"pk":     false,
 			},
 		}
@@ -146,7 +148,7 @@ func TestCreateTable(t *testing.T) {
 		// iterate fields
 		for name, field := range fields {
 			if !field["exists"].(bool) {
-				t.Errorf("field %v is not found", name)
+				t.Errorf("field %v not found", name)
 			}
 		}
 	}
