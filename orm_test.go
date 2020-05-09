@@ -154,3 +154,53 @@ func TestCreateTable(t *testing.T) {
 	}
 
 }
+
+func TestAddUpdateDelete(t *testing.T) {
+	db := createTestDatabase()
+	defer deleteTestDatabase()
+
+	// create user table instance
+	table, err := tables.NewTable(db, &User{})
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if err := table.Create(true); err != nil {
+		t.Error(err)
+	}
+
+	user := User{
+		ID:       1,
+		Username: "username",
+		Password: "pwd",
+	}
+
+	// Add
+	if err := table.Add(&user); err != nil {
+		t.Fatal(err)
+	}
+
+	// check
+	if rows, err := db.Query("SELECT ID, Username, Password FROM " + table.Name()); err != nil {
+		t.Error(err)
+	} else {
+		if rows.Next() {
+			user1 := User{}
+			if err := rows.Scan(&user1.ID, &user1.Username, &user1.Password); err != nil {
+				t.Error(err)
+			}
+			if user1.ID != user.ID {
+				t.Errorf("user's ID is wrong: %v", user1.ID)
+			}
+			if user1.Username != user.Username {
+				t.Errorf("user's username is wrong: %v", user1.Username)
+			}
+			if user1.Password != user.Password {
+				t.Errorf("user's Password is wrong: %v", user1.Password)
+			}
+		} else {
+			t.Error("no user found")
+		}
+	}
+
+}

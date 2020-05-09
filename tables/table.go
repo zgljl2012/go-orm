@@ -84,3 +84,51 @@ func (t *simpleTable) Name() string {
 	name := reflect.TypeOf(reflect.Indirect(reflect.ValueOf(t.table)).Interface()).Name()
 	return name
 }
+
+// Add
+func (t *simpleTable) Add(instance interface{}) error {
+	sql := "INSERT INTO " + t.Name() + " ("
+	// fields
+	fields := instance.(orm.ModelFields).Fields()
+	names := []string{}
+	values := []interface{}{}
+	params := []string{}
+	_ = values
+	for _, field := range fields {
+		names = append(names, field.Name())
+		value := reflect.ValueOf(instance).Elem().FieldByName(field.Name()).Interface()
+		values = append(values, value)
+		params = append(params, "?")
+	}
+	sql += strings.Join(names, ",")
+	sql += ") VALUES ("
+	// values
+	sql += strings.Join(params, ",")
+	sql += ")"
+	log.Info(sql)
+	tx, err := t.db.Begin()
+	if err != nil {
+		return err
+	}
+	stmt, err := tx.Prepare(sql)
+	if err != nil {
+		return err
+	}
+	if _, err := stmt.Exec(values...); err != nil {
+		return err
+	}
+	if err := tx.Commit(); err != nil {
+		return err
+	}
+	return nil
+}
+
+// Delete
+func (t *simpleTable) Delete(instance interface{}) error {
+	return nil
+}
+
+// Update
+func (t *simpleTable) Update(instance interface{}) error {
+	return nil
+}

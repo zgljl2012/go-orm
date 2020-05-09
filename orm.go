@@ -13,4 +13,12 @@ type Table interface {
 	Create(skipIfExists bool) error
 	// Table name that automatically created by orm
 	Name() string
+	// Add
+	Add(instance interface{}) error
+	// Delete
+	Delete(instance interface{}) error
+	// Update
+	Update(instance interface{}) error
+	// Query
+	// Query() error
 }
