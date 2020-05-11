@@ -50,10 +50,19 @@ func NewCharField(name string, opts ...FieldOption) orm.Field {
 
 // Type return type
 func (f *myField) Type() string {
+	var t string
+
 	if f._type == CHAR {
-		return f._type.String() + fmt.Sprintf("(%d)", f.options.Length)
+		t = f._type.String() + fmt.Sprintf("(%d)", f.options.Length)
+	} else {
+		t = f._type.String()
 	}
-	return f._type.String()
+	if !f.options.Null {
+		t += " NOT NULL"
+	} else {
+		t += " NULL"
+	}
+	return t
 }
 
 func (f *myField) Name() string {

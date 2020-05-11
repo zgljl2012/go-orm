@@ -31,10 +31,10 @@ type User struct {
 // Fields return all fields to want to bind with database
 func (u *User) Fields() []orm.Field {
 	return []orm.Field{
-		fields.NewIntField("ID", fields.WithPrimaryKey(true)),
+		fields.NewIntField("ID", fields.WithPrimaryKey(true), fields.WithNull(false)),
 		fields.NewCharField("Username", fields.WithLength(20)),
 		fields.NewCharField("Password", fields.WithLength(50)),
-		fields.NewBoolField("Active"),
+		fields.NewBoolField("Active", fields.WithNull(false)),
 		fields.NewDatetimeField("CreatedAt"),
 	}
 }
@@ -111,26 +111,31 @@ func TestCreateTable(t *testing.T) {
 				"exists": false,
 				"type":   "INT",
 				"pk":     true,
+				"null":   false,
 			},
 			"Username": {
 				"exists": false,
 				"type":   "CHAR(20)",
 				"pk":     false,
+				"null":   true,
 			},
 			"Password": {
 				"exists": false,
 				"type":   "CHAR(50)",
 				"pk":     false,
+				"null":   true,
 			},
 			"Active": {
 				"exists": false,
 				"type":   "BOOL",
 				"pk":     false,
+				"null":   false,
 			},
 			"CreatedAt": {
 				"exists": false,
 				"type":   "DATETIME",
 				"pk":     false,
+				"null":   true,
 			},
 		}
 
@@ -146,7 +151,7 @@ func TestCreateTable(t *testing.T) {
 			if err := result.Scan(&cid, &name, &_type, &notnull, &dflt_value, &pk); err != nil {
 				t.Error(err)
 			}
-			t.Log(cid, name, _type, notnull, dflt_value, pk)
+			t.Log(cid, name, _type, notnull, dflt_value, pk, notnull)
 			// validate field
 			if field, ok := fields[name]; ok {
 				field["exists"] = true
@@ -155,6 +160,9 @@ func TestCreateTable(t *testing.T) {
 				}
 				if field["pk"].(bool) != pk {
 					t.Errorf("Field %v's pk is wrong, expect %v, but got %v", name, field["pk"], pk)
+				}
+				if field["null"].(bool) != !notnull {
+					t.Errorf("Field %v's null is wrong, expect %v, but got %v", name, field["null"], !notnull)
 				}
 			} else {
 				t.Errorf("There is a undefined field, name:%v, type:%v, pk:%v", name, _type, pk)
