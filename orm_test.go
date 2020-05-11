@@ -36,8 +36,8 @@ func (u *User) Fields() []orm.Field {
 		fields.NewCharField("Username", fields.WithLength(20)),
 		fields.NewCharField("Password", fields.WithLength(50)),
 		fields.NewBoolField("Active", fields.WithNull(false)),
-		fields.NewDatetimeField("CreatedAt"),
 		fields.NewFloatField("Age"),
+		fields.NewDatetimeField("CreatedAt"),
 	}
 }
 
@@ -295,18 +295,15 @@ func TestFilterSet(t *testing.T) {
 	}
 
 	// Filter
-	if filter, err := table.Filter(); err != nil {
-		t.Error(err)
-	} else {
-		rows := filter.All()
-		id := 1
-		for _, row := range rows {
-			user := row.(User)
-			if id != user.ID {
-				t.Errorf("ID should be %v, but got %v", id, user.ID)
-			}
-			id += 1
+	filter := table.Filter()
+	rows := filter.All()
+	id := 1
+	for _, row := range rows {
+		user := row.(User)
+		if id != user.ID {
+			t.Errorf("ID should be %v, but got %v", id, user.ID)
 		}
+		id += 1
 	}
 
 	// Add
@@ -319,35 +316,34 @@ func TestFilterSet(t *testing.T) {
 	}
 
 	// validate
-	if filter, err := table.Filter(); err != nil {
-		t.Error(err)
-	} else {
-		rows := filter.All()
-		id := 1
-		for _, row := range rows {
-			user := row.(User)
-			if id != user.ID {
-				t.Errorf("ID should be %v, but got %v", id, user.ID)
-			}
-			if user.Username != fmt.Sprintf("username%d", id) {
-				t.Errorf("ID should be %v, but got %v", fmt.Sprintf("username%d", id), user.Username)
-			}
-			id += 1
+	filter = table.Filter()
+	rows = filter.All()
+	id = 1
+	for _, row := range rows {
+		user := row.(User)
+		if id != user.ID {
+			t.Errorf("ID should be %v, but got %v", id, user.ID)
 		}
+		if user.Username != fmt.Sprintf("username%d", id) {
+			t.Errorf("ID should be %v, but got %v", fmt.Sprintf("username%d", id), user.Username)
+		}
+		id += 1
 	}
 
 	// filter with id=1
-	if filter, err := table.Filter(orm.WithParameter("ID", 1)); err != nil {
-		t.Error(err)
-	} else {
-		rows := filter.All()
-		if len(rows) != 1 {
-			t.Error("You should only filter one row")
-		}
-		user1 := rows[0].(User)
-		if user1.ID != 1 {
-			t.Errorf("Expect id is 1, but got %v", user1.ID)
-		}
+	filter = table.Filter(orm.WithParameter("ID", 1))
+	rows = filter.All()
+	if len(rows) != 1 {
+		t.Error("You should only filter one row")
+	}
+	user1 := rows[0].(User)
+	if user1.ID != 1 {
+		t.Errorf("Expect id is 1, but got %v", user1.ID)
 	}
 
+	// orderby
+	user1 = table.Filter().OrderBy("-ID").All()[0].(User)
+	if user1.ID != 10 {
+		t.Errorf("ID of this user should be 10, but got %v", user1.ID)
+	}
 }

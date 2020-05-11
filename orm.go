@@ -21,7 +21,7 @@ type Table interface {
 	// So your should be sure of your primary keys won't be updated.
 	Update(instance interface{}) error
 	// Filter rows
-	Filter(...*QueryParameter) (FilterSet, error)
+	Filter(...*QueryParameter) FilterSet
 	// Count get the counts
 	Count(instance interface{}) (int, error)
 }
