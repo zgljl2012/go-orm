@@ -99,6 +99,7 @@ func createTestDatabase() *sql.DB {
 	return db
 }
 
+// delete test db
 func deleteTestDatabase() {
 	if err := os.Remove(testDB); err != nil {
 		log.Fatal(err)
