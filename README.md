@@ -19,21 +19,33 @@ You should implement `Field() []orm.Field` interface for your struct.
 
 // User is a test table
 type User struct {
-	ID       int
-	Username string
-	Password string
+	ID        int
+	Username  string
+	Password  string
+	Active    bool
+	CreatedAt time.Time
 }
 
 // Fields return all fields to want to bind with database
 func (u *User) Fields() []orm.Field {
 	return []orm.Field{
-		fields.NewIntField("ID", fields.WithPrimaryKey(true)),
+		fields.NewIntField("ID", fields.WithPrimaryKey(true), fields.WithNull(false)),
 		fields.NewCharField("Username", fields.WithLength(20)),
 		fields.NewCharField("Password", fields.WithLength(50)),
+		fields.NewBoolField("Active", fields.WithNull(false)),
+		fields.NewDatetimeField("CreatedAt"),
 	}
 }
 
 ```
+
+Supported Type:
+
++ `Int`
++ `Float`
++ `Bool`
++ `Datetime`
++ `Char`
 
 ### Create Table
 
@@ -61,17 +73,21 @@ var (
 
 // User is a test table
 type User struct {
-	ID       int
-	Username string
-	Password string
+	ID        int
+	Username  string
+	Password  string
+	Active    bool
+	CreatedAt time.Time
 }
 
 // Fields return all fields to want to bind with database
 func (u *User) Fields() []orm.Field {
 	return []orm.Field{
-		fields.NewIntField("ID", fields.WithPrimaryKey(true)),
+		fields.NewIntField("ID", fields.WithPrimaryKey(true), fields.WithNull(false)),
 		fields.NewCharField("Username", fields.WithLength(20)),
 		fields.NewCharField("Password", fields.WithLength(50)),
+		fields.NewBoolField("Active", fields.WithNull(false)),
+		fields.NewDatetimeField("CreatedAt"),
 	}
 }
 
