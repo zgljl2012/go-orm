@@ -25,6 +25,7 @@ type User struct {
 	Username  string
 	Password  string
 	Active    bool
+	Age       float32
 	CreatedAt time.Time
 }
 
@@ -36,6 +37,7 @@ func (u *User) Fields() []orm.Field {
 		fields.NewCharField("Password", fields.WithLength(50)),
 		fields.NewBoolField("Active", fields.WithNull(false)),
 		fields.NewDatetimeField("CreatedAt"),
+		fields.NewFloatField("Age"),
 	}
 }
 
@@ -134,6 +136,12 @@ func TestCreateTable(t *testing.T) {
 			"CreatedAt": {
 				"exists": false,
 				"type":   "DATETIME",
+				"pk":     false,
+				"null":   true,
+			},
+			"Age": {
+				"exists": false,
+				"type":   "FLOAT",
 				"pk":     false,
 				"null":   true,
 			},

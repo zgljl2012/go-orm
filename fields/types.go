@@ -6,6 +6,8 @@ type Type int
 const (
 	// INT int
 	INT Type = iota
+	// FLOAT float
+	FLOAT
 	// CHAR char
 	CHAR
 	// BOOL boolean
@@ -18,6 +20,8 @@ func (t Type) String() string {
 	switch t {
 	case INT:
 		return "INT"
+	case FLOAT:
+		return "FLOAT"
 	case CHAR:
 		return "CHAR"
 	case BOOL:

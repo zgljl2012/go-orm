@@ -37,6 +37,11 @@ func NewBoolField(name string, opts ...FieldOption) orm.Field {
 	return newFiled(name, BOOL, opts...)
 }
 
+// NewFloatField new a bool field
+func NewFloatField(name string, opts ...FieldOption) orm.Field {
+	return newFiled(name, FLOAT, opts...)
+}
+
 // NewDatetimeField new a datetime field
 func NewDatetimeField(name string, opts ...FieldOption) orm.Field {
 	return newFiled(name, DATETIME, opts...)
