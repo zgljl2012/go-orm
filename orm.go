@@ -17,7 +17,8 @@ type Table interface {
 	Add(instance interface{}) error
 	// Delete
 	Delete(instance interface{}) error
-	// Update
+	// Update operate will select those row via primary keys, then update other fields.
+	// So your should be sure of your primary keys won't be updated.
 	Update(instance interface{}) error
 	// Query
 	// Query() error

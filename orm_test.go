@@ -178,8 +178,22 @@ func TestAddUpdateDelete(t *testing.T) {
 	// Add
 	if err := table.Add(&user); err != nil {
 		t.Fatal(err)
+	} else {
+		checkUser(t, db, table, &user)
 	}
 
+	// Update
+	user.Username = "username1"
+
+	if err := table.Update(&user); err != nil {
+		t.Error(err)
+	} else {
+		checkUser(t, db, table, &user)
+	}
+
+}
+
+func checkUser(t *testing.T, db *sql.DB, table orm.Table, expect *User) {
 	// check
 	if rows, err := db.Query("SELECT ID, Username, Password FROM " + table.Name()); err != nil {
 		t.Error(err)
@@ -189,18 +203,18 @@ func TestAddUpdateDelete(t *testing.T) {
 			if err := rows.Scan(&user1.ID, &user1.Username, &user1.Password); err != nil {
 				t.Error(err)
 			}
-			if user1.ID != user.ID {
+			if user1.ID != expect.ID {
 				t.Errorf("user's ID is wrong: %v", user1.ID)
 			}
-			if user1.Username != user.Username {
-				t.Errorf("user's username is wrong: %v", user1.Username)
+			if user1.Username != expect.Username {
+				t.Errorf("user's username is wrong: %v, expect: %v", user1.Username, expect.Username)
 			}
-			if user1.Password != user.Password {
+			if user1.Password != expect.Password {
 				t.Errorf("user's Password is wrong: %v", user1.Password)
 			}
 		} else {
 			t.Error("no user found")
 		}
+		rows.Close()
 	}
-
 }

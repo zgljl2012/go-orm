@@ -17,6 +17,8 @@ const (
 	ErrTableShouldBeStruct = "table should be struct"
 	// ErrTableNotImplementModelFields implement modelFields
 	ErrTableNotImplementModelFields = "table is not implement ModelFields, there are not found function: Fields() []orm.Field "
+	// ErrRowIsNotExists exists error
+	ErrRowIsNotExists = "The row not exists"
 )
 
 type simpleTable struct {
@@ -120,6 +122,9 @@ func (t *simpleTable) Add(instance interface{}) error {
 	if err := tx.Commit(); err != nil {
 		return err
 	}
+	if err := stmt.Close(); err != nil {
+		return err
+	}
 	return nil
 }
 
@@ -128,7 +133,104 @@ func (t *simpleTable) Delete(instance interface{}) error {
 	return nil
 }
 
+func (t *simpleTable) ParseInstance(instance interface{}, justPrimaryKeys bool) ([]string, []interface{}) {
+	// fields
+	fields := instance.(orm.ModelFields).Fields()
+	names := []string{}
+	values := []interface{}{}
+	params := []string{}
+	_ = values
+	for _, field := range fields {
+		if !justPrimaryKeys || field.PrimaryKey() {
+			names = append(names, field.Name())
+			value := reflect.ValueOf(instance).Elem().FieldByName(field.Name()).Interface()
+			values = append(values, value)
+			params = append(params, "?")
+		}
+	}
+	return names, values
+}
+
+func (t *simpleTable) Exists(instance interface{}) error {
+	names, values := t.ParseInstance(instance, true)
+	sql := "SELECT COUNT(*) FROM " + t.Name() + " WHERE "
+	for i, name := range names {
+		names[i] = fmt.Sprintf("%s=?", name)
+	}
+	sql += strings.Join(names, ",")
+	log.Info(sql)
+	tx, err := t.db.Begin()
+	if err != nil {
+		return err
+	}
+	stmt, err := tx.Prepare(sql)
+	if err != nil {
+		return err
+	}
+	cnt := 0
+	if err := stmt.QueryRow(values...).Scan(&cnt); err != nil {
+		return err
+	}
+	if cnt == 0 {
+		return fmt.Errorf(ErrRowIsNotExists)
+	}
+	if err := tx.Commit(); err != nil {
+		return err
+	}
+	if err := stmt.Close(); err != nil {
+		return err
+	}
+	return nil
+}
+
 // Update
 func (t *simpleTable) Update(instance interface{}) error {
+	// check the row exists or not
+	if err := t.Exists(instance); err != nil {
+		return err
+	}
+	// get primary keys
+	primaryKeys, primaryValues := t.ParseInstance(instance, true)
+	for i, key := range primaryKeys {
+		primaryKeys[i] = fmt.Sprintf("%s=?", key)
+	}
+
+	// keys, values
+	names, values := t.ParseInstance(instance, false)
+
+	for i, name := range names {
+		names[i] = fmt.Sprintf("%s=?", name)
+	}
+
+	// sql
+	sql := "UPDATE " + t.Name() + " SET "
+	sql += strings.Join(names, ",")
+	sql += " WHERE " + strings.Join(primaryKeys, ",")
+
+	log.Info(sql)
+
+	tx, err := t.db.Begin()
+	if err != nil {
+		log.Error(err)
+		return err
+	}
+	stmt, err := tx.Prepare(sql)
+	if err != nil {
+		log.Error(err)
+		return err
+	}
+	values = append(values, primaryValues...)
+	if _, err := stmt.Exec(values...); err != nil {
+		log.Error(err)
+		return err
+	}
+	if err := tx.Commit(); err != nil {
+		log.Error(err)
+		return err
+	}
+	if err := stmt.Close(); err != nil {
+		log.Error(err)
+		return err
+	}
 	return nil
 }
