@@ -13,8 +13,7 @@ type myField struct {
 	options *FieldOptions
 }
 
-// NewIntField new an int field
-func NewIntField(name string, opts ...FieldOption) orm.Field {
+func newFiled(name string, _type string, opts ...FieldOption) orm.Field {
 	options := defaultOptions
 
 	for _, o := range opts {
@@ -23,25 +22,20 @@ func NewIntField(name string, opts ...FieldOption) orm.Field {
 
 	return &myField{
 		name:    name,
-		_type:   "INT",
+		_type:   _type,
 		options: &options,
 	}
+}
+
+// NewIntField new an int field
+func NewIntField(name string, opts ...FieldOption) orm.Field {
+	return newFiled(name, "INT", opts...)
 }
 
 // NewCharField new a char field
 // you can set the length with WithLength, the default length is 100.
 func NewCharField(name string, opts ...FieldOption) orm.Field {
-	options := defaultOptions
-
-	for _, o := range opts {
-		o(&options)
-	}
-
-	return &myField{
-		name:    name,
-		_type:   "CHAR",
-		options: &options,
-	}
+	return newFiled(name, "CHAR", opts...)
 }
 
 // Type return type
