@@ -20,8 +20,8 @@ type Table interface {
 	// Update operate will select those row via primary keys, then update other fields.
 	// So your should be sure of your primary keys won't be updated.
 	Update(instance interface{}) error
-	// Query
-	// Query() error
+	// Filter rows
+	Filter(...*QueryParameter) (FilterSet, error)
 	// Count get the counts
 	Count(instance interface{}) (int, error)
 }
@@ -46,9 +46,9 @@ type FilterSet interface {
 	// Filter with paramters
 	Filter(parameters ...*QueryParameter) FilterSet
 	// OrderBy specify ordering fields, plus means ASC, minus(-) means DESC
-	OrderBy([]string) FilterSet
+	OrderBy(...string) FilterSet
 	// Limit rows
 	Limit(int) FilterSet
-	// All return all rows
+	// All return all rows, returned data just an array of objects, not pointer.
 	All() []interface{}
 }

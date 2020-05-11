@@ -233,3 +233,61 @@ func checkUser(t *testing.T, db *sql.DB, table orm.Table, expect *User) {
 		rows.Close()
 	}
 }
+
+func TestFilterSet(t *testing.T) {
+	db := createTestDatabase()
+	defer deleteTestDatabase()
+
+	// create user table instance
+	table, err := tables.NewTable(db, &User{})
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if err := table.Create(true); err != nil {
+		t.Error(err)
+	}
+
+	user := User{
+		ID:       1,
+		Username: "username",
+		Password: "pwd",
+	}
+
+	// Add
+	if err := table.Add(&user); err != nil {
+		t.Fatal(err)
+	}
+
+	// Filter
+	if filter, err := table.Filter(); err != nil {
+		t.Error(err)
+	} else {
+		rows := filter.All()
+		for _, row := range rows {
+			user := row.(User)
+			t.Log(user)
+		}
+	}
+
+	// Add
+	for i := 1; i < 10; i++ {
+		user.ID = i + 1
+		user.Username = fmt.Sprintf("username%d", i+1)
+		if err := table.Add(&user); err != nil {
+			t.Fatal(err)
+		}
+	}
+
+	// validate
+	if filter, err := table.Filter(); err != nil {
+		t.Error(err)
+	} else {
+		rows := filter.All()
+		for _, row := range rows {
+			user := row.(User)
+			t.Log(user)
+		}
+	}
+
+}
