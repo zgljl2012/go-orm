@@ -37,6 +37,11 @@ func NewBoolField(name string, opts ...FieldOption) orm.Field {
 	return newFiled(name, "BOOL", opts...)
 }
 
+// NewDatetimeField new a datetime field
+func NewDatetimeField(name string, opts ...FieldOption) orm.Field {
+	return newFiled(name, "DATETIME", opts...)
+}
+
 // NewCharField new a char field
 // you can set the length with WithLength, the default length is 100.
 func NewCharField(name string, opts ...FieldOption) orm.Field {

@@ -3,6 +3,7 @@ package orm_test
 import (
 	"database/sql"
 	"fmt"
+	"time"
 
 	"os"
 	"testing"
@@ -20,10 +21,11 @@ var (
 
 // User is a test table
 type User struct {
-	ID       int
-	Username string
-	Password string
-	Active   bool
+	ID        int
+	Username  string
+	Password  string
+	Active    bool
+	CreatedAt time.Time
 }
 
 // Fields return all fields to want to bind with database
@@ -33,6 +35,7 @@ func (u *User) Fields() []orm.Field {
 		fields.NewCharField("Username", fields.WithLength(20)),
 		fields.NewCharField("Password", fields.WithLength(50)),
 		fields.NewBoolField("Active"),
+		fields.NewDatetimeField("CreatedAt"),
 	}
 }
 
@@ -124,6 +127,11 @@ func TestCreateTable(t *testing.T) {
 				"type":   "BOOL",
 				"pk":     false,
 			},
+			"CreatedAt": {
+				"exists": false,
+				"type":   "DATETIME",
+				"pk":     false,
+			},
 		}
 
 		for result.Next() {
@@ -178,9 +186,11 @@ func TestAddUpdateDelete(t *testing.T) {
 	}
 
 	user := User{
-		ID:       1,
-		Username: "username",
-		Password: "pwd",
+		ID:        1,
+		Username:  "username",
+		Password:  "pwd",
+		Active:    false,
+		CreatedAt: time.Now(),
 	}
 
 	// Add
@@ -256,9 +266,11 @@ func TestFilterSet(t *testing.T) {
 	}
 
 	user := User{
-		ID:       1,
-		Username: "username1",
-		Password: "pwd",
+		ID:        1,
+		Username:  "username1",
+		Password:  "pwd",
+		Active:    false,
+		CreatedAt: time.Now(),
 	}
 
 	// Add
