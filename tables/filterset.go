@@ -66,6 +66,18 @@ func (f *filterSet) All() []interface{} {
 		sql += strings.Join(names, ",")
 	}
 	// order
+	var orders []string
+	for _, order := range f.order {
+		order = strings.Trim(order, " ")
+		if order[0] == '-' {
+			orders = append(orders, order[1:]+" DESC")
+		} else {
+			orders = append(orders, order)
+		}
+	}
+	if len(orders) > 0 {
+		sql += " ORDER BY " + strings.Join(orders, ",")
+	}
 	// limit
 	// query
 	log.Info(sql)
