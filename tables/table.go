@@ -152,6 +152,17 @@ func (t *simpleTable) ParseInstance(instance interface{}, justPrimaryKeys bool) 
 }
 
 func (t *simpleTable) Exists(instance interface{}) error {
+	cnt, err := t.Count(instance)
+	if err != nil {
+		return err
+	}
+	if cnt == 0 {
+		return fmt.Errorf(ErrRowIsNotExists)
+	}
+	return nil
+}
+
+func (t *simpleTable) Count(instance interface{}) (int, error) {
 	names, values := t.ParseInstance(instance, true)
 	sql := "SELECT COUNT(*) FROM " + t.Name() + " WHERE "
 	for i, name := range names {
@@ -161,26 +172,23 @@ func (t *simpleTable) Exists(instance interface{}) error {
 	log.Info(sql)
 	tx, err := t.db.Begin()
 	if err != nil {
-		return err
+		return 0, err
 	}
 	stmt, err := tx.Prepare(sql)
 	if err != nil {
-		return err
+		return 0, err
 	}
 	cnt := 0
 	if err := stmt.QueryRow(values...).Scan(&cnt); err != nil {
-		return err
-	}
-	if cnt == 0 {
-		return fmt.Errorf(ErrRowIsNotExists)
+		return 0, err
 	}
 	if err := tx.Commit(); err != nil {
-		return err
+		return 0, err
 	}
 	if err := stmt.Close(); err != nil {
-		return err
+		return 0, err
 	}
-	return nil
+	return cnt, nil
 }
 
 // Update

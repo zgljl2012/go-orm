@@ -15,11 +15,13 @@ type Table interface {
 	Name() string
 	// Add
 	Add(instance interface{}) error
-	// Delete
+	// Delete operate will delete via primary keys
 	Delete(instance interface{}) error
 	// Update operate will select those row via primary keys, then update other fields.
 	// So your should be sure of your primary keys won't be updated.
 	Update(instance interface{}) error
 	// Query
 	// Query() error
+	// Count get the counts
+	Count(instance interface{}) (int, error)
 }
