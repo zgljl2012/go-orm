@@ -250,7 +250,7 @@ func TestFilterSet(t *testing.T) {
 
 	user := User{
 		ID:       1,
-		Username: "username",
+		Username: "username1",
 		Password: "pwd",
 	}
 
@@ -264,9 +264,13 @@ func TestFilterSet(t *testing.T) {
 		t.Error(err)
 	} else {
 		rows := filter.All()
+		id := 1
 		for _, row := range rows {
 			user := row.(User)
-			t.Log(user)
+			if id != user.ID {
+				t.Errorf("ID should be %v, but got %v", id, user.ID)
+			}
+			id += 1
 		}
 	}
 
@@ -284,9 +288,16 @@ func TestFilterSet(t *testing.T) {
 		t.Error(err)
 	} else {
 		rows := filter.All()
+		id := 1
 		for _, row := range rows {
 			user := row.(User)
-			t.Log(user)
+			if id != user.ID {
+				t.Errorf("ID should be %v, but got %v", id, user.ID)
+			}
+			if user.Username != fmt.Sprintf("username%d", id) {
+				t.Errorf("ID should be %v, but got %v", fmt.Sprintf("username%d", id), user.Username)
+			}
+			id += 1
 		}
 	}
 

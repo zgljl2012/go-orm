@@ -82,10 +82,7 @@ func (f *filterSet) All() []interface{} {
 		log.Error("iterate data error", "err", err)
 	} else {
 		for rows.Next() {
-			cols, _ := rows.Columns()
-			log.Info(cols)
 			// new instance
-			log.Info(reflect.TypeOf(f.instance).Elem())
 			obj := reflect.New(reflect.TypeOf(f.instance).Elem()).Elem()
 			numCols := reflect.TypeOf(f.instance).Elem().NumField()
 			columns := make([]interface{}, numCols)
@@ -109,4 +106,8 @@ func (f *filterSet) All() []interface{} {
 		log.Error(err)
 	}
 	return result
+}
+
+func (f *filterSet) Offset(int) orm.FilterSet {
+	return f
 }

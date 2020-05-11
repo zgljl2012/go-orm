@@ -49,6 +49,8 @@ type FilterSet interface {
 	OrderBy(...string) FilterSet
 	// Limit rows
 	Limit(int) FilterSet
+	// Offset set offset
+	Offset(int) FilterSet
 	// All return all rows, returned data just an array of objects, not pointer.
 	All() []interface{}
 }
