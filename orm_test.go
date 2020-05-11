@@ -23,6 +23,7 @@ type User struct {
 	ID       int
 	Username string
 	Password string
+	Active   bool
 }
 
 // Fields return all fields to want to bind with database
@@ -31,6 +32,7 @@ func (u *User) Fields() []orm.Field {
 		fields.NewIntField("ID", fields.WithPrimaryKey(true)),
 		fields.NewCharField("Username", fields.WithLength(20)),
 		fields.NewCharField("Password", fields.WithLength(50)),
+		fields.NewBoolField("Active"),
 	}
 }
 
@@ -115,6 +117,11 @@ func TestCreateTable(t *testing.T) {
 			"Password": {
 				"exists": false,
 				"type":   "CHAR(50)",
+				"pk":     false,
+			},
+			"Active": {
+				"exists": false,
+				"type":   "BOOL",
 				"pk":     false,
 			},
 		}

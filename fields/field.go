@@ -32,6 +32,11 @@ func NewIntField(name string, opts ...FieldOption) orm.Field {
 	return newFiled(name, "INT", opts...)
 }
 
+// NewBoolField new a bool field
+func NewBoolField(name string, opts ...FieldOption) orm.Field {
+	return newFiled(name, "BOOL", opts...)
+}
+
 // NewCharField new a char field
 // you can set the length with WithLength, the default length is 100.
 func NewCharField(name string, opts ...FieldOption) orm.Field {
