@@ -25,3 +25,30 @@ type Table interface {
 	// Count get the counts
 	Count(instance interface{}) (int, error)
 }
+
+// QueryParameter for filter
+type QueryParameter struct {
+	Name  string
+	Value interface{}
+}
+
+// WithParameter create paramter pair
+func WithParameter(name string, value interface{}) *QueryParameter {
+	return &QueryParameter{
+		Name:  name,
+		Value: value,
+	}
+}
+
+// FilterSet for select
+// you can iterate FilterSet via range
+type FilterSet interface {
+	// Filter with paramters
+	Filter(parameters ...*QueryParameter) FilterSet
+	// OrderBy specify ordering fields, plus means ASC, minus(-) means DESC
+	OrderBy([]string) FilterSet
+	// Limit rows
+	Limit(int) FilterSet
+	// All return all rows
+	All() []interface{}
+}

@@ -2,7 +2,8 @@ package fields
 
 import (
 	"fmt"
-	"orm"
+
+	"github.com/zgljl2012/go-orm"
 )
 
 // Field int field

@@ -3,13 +3,14 @@ package orm_test
 import (
 	"database/sql"
 	"fmt"
-	"orm"
-	"orm/fields"
-	"orm/tables"
+
 	"os"
 	"testing"
 
 	_ "github.com/mattn/go-sqlite3"
+	"github.com/zgljl2012/go-orm"
+	"github.com/zgljl2012/go-orm/fields"
+	"github.com/zgljl2012/go-orm/tables"
 	log "github.com/zgljl2012/slog"
 )
 

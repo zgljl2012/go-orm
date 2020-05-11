@@ -3,10 +3,10 @@ package tables
 import (
 	"database/sql"
 	"fmt"
-	"orm"
 	"reflect"
 	"strings"
 
+	"github.com/zgljl2012/go-orm"
 	log "github.com/zgljl2012/slog"
 )
 
