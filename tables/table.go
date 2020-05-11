@@ -87,27 +87,7 @@ func (t *simpleTable) Name() string {
 	return name
 }
 
-// Add
-func (t *simpleTable) Add(instance interface{}) error {
-	sql := "INSERT INTO " + t.Name() + " ("
-	// fields
-	fields := instance.(orm.ModelFields).Fields()
-	names := []string{}
-	values := []interface{}{}
-	params := []string{}
-	_ = values
-	for _, field := range fields {
-		names = append(names, field.Name())
-		value := reflect.ValueOf(instance).Elem().FieldByName(field.Name()).Interface()
-		values = append(values, value)
-		params = append(params, "?")
-	}
-	sql += strings.Join(names, ",")
-	sql += ") VALUES ("
-	// values
-	sql += strings.Join(params, ",")
-	sql += ")"
-	log.Info(sql)
+func (t *simpleTable) exec(sql string, values []interface{}) error {
 	tx, err := t.db.Begin()
 	if err != nil {
 		return err
@@ -128,44 +108,49 @@ func (t *simpleTable) Add(instance interface{}) error {
 	return nil
 }
 
+// Add
+func (t *simpleTable) Add(instance interface{}) error {
+	sql := "INSERT INTO " + t.Name() + " ("
+	// fields
+	names, values := t.parseInstance(instance, false)
+	params := []string{}
+	for range names {
+		params = append(params, "?")
+	}
+	sql += strings.Join(names, ",")
+	sql += ") VALUES ("
+	// values
+	sql += strings.Join(params, ",")
+	sql += ")"
+
+	log.Debug(sql)
+
+	if err := t.exec(sql, values); err != nil {
+		log.Error("got an error when add data", "err", err)
+		return err
+	}
+	return nil
+}
+
 // Delete
 func (t *simpleTable) Delete(instance interface{}) error {
 	// get primary keys
-	primaryKeys, primaryValues := t.ParseInstance(instance, true)
+	primaryKeys, primaryValues := t.parseInstance(instance, true)
 	for i, key := range primaryKeys {
 		primaryKeys[i] = fmt.Sprintf("%s=?", key)
 	}
 	sql := "DELETE FROM " + t.Name() + " WHERE " + strings.Join(primaryKeys, ",")
 
-	log.Info(sql)
+	log.Debug(sql)
 
-	tx, err := t.db.Begin()
-	if err != nil {
-		log.Error(err)
+	if err := t.exec(sql, primaryValues); err != nil {
+		log.Error("got an error when delete data", "err", err)
 		return err
 	}
-	stmt, err := tx.Prepare(sql)
-	if err != nil {
-		log.Error(err)
-		return err
-	}
-	if _, err := stmt.Exec(primaryValues...); err != nil {
-		log.Error(err)
-		return err
-	}
-	if err := tx.Commit(); err != nil {
-		log.Error(err)
-		return err
-	}
-	if err := stmt.Close(); err != nil {
-		log.Error(err)
-		return err
-	}
-
 	return nil
 }
 
-func (t *simpleTable) ParseInstance(instance interface{}, justPrimaryKeys bool) ([]string, []interface{}) {
+func (t *simpleTable) parseInstance(instance interface{}, justPrimaryKeys bool) ([]string, []interface{}) {
 	// fields
 	fields := instance.(orm.ModelFields).Fields()
 	names := []string{}
@@ -195,13 +180,13 @@ func (t *simpleTable) Exists(instance interface{}) error {
 }
 
 func (t *simpleTable) Count(instance interface{}) (int, error) {
-	names, values := t.ParseInstance(instance, true)
+	names, values := t.parseInstance(instance, true)
 	sql := "SELECT COUNT(*) FROM " + t.Name() + " WHERE "
 	for i, name := range names {
 		names[i] = fmt.Sprintf("%s=?", name)
 	}
 	sql += strings.Join(names, ",")
-	log.Info(sql)
+	log.Debug(sql)
 	tx, err := t.db.Begin()
 	if err != nil {
 		return 0, err
@@ -230,13 +215,13 @@ func (t *simpleTable) Update(instance interface{}) error {
 		return err
 	}
 	// get primary keys
-	primaryKeys, primaryValues := t.ParseInstance(instance, true)
+	primaryKeys, primaryValues := t.parseInstance(instance, true)
 	for i, key := range primaryKeys {
 		primaryKeys[i] = fmt.Sprintf("%s=?", key)
 	}
 
 	// keys, values
-	names, values := t.ParseInstance(instance, false)
+	names, values := t.parseInstance(instance, false)
 
 	for i, name := range names {
 		names[i] = fmt.Sprintf("%s=?", name)
@@ -247,29 +232,10 @@ func (t *simpleTable) Update(instance interface{}) error {
 	sql += strings.Join(names, ",")
 	sql += " WHERE " + strings.Join(primaryKeys, ",")
 
-	log.Info(sql)
+	log.Debug(sql)
 
-	tx, err := t.db.Begin()
-	if err != nil {
-		log.Error(err)
-		return err
-	}
-	stmt, err := tx.Prepare(sql)
-	if err != nil {
-		log.Error(err)
-		return err
-	}
-	values = append(values, primaryValues...)
-	if _, err := stmt.Exec(values...); err != nil {
-		log.Error(err)
-		return err
-	}
-	if err := tx.Commit(); err != nil {
-		log.Error(err)
-		return err
-	}
-	if err := stmt.Close(); err != nil {
-		log.Error(err)
+	if err := t.exec(sql, append(values, primaryValues...)); err != nil {
+		log.Error("got an error when update data", "err", err)
 		return err
 	}
 	return nil
