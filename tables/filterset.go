@@ -2,6 +2,7 @@ package tables
 
 import (
 	"database/sql"
+	"fmt"
 	"reflect"
 	"strings"
 
@@ -12,6 +13,7 @@ import (
 type filterSet struct {
 	instance   interface{}
 	table      string
+	offset     int
 	limit      int
 	parameters []*orm.QueryParameter
 	order      []string
@@ -24,6 +26,7 @@ func newFilterSet(db *sql.DB, table string, instance interface{}) orm.FilterSet 
 		db:         db,
 		table:      table,
 		limit:      0,
+		offset:     0,
 		parameters: []*orm.QueryParameter{},
 	}
 }
@@ -79,6 +82,18 @@ func (f *filterSet) All() []interface{} {
 		sql += " ORDER BY " + strings.Join(orders, ",")
 	}
 	// limit
+	if f.limit > 0 {
+		sql += fmt.Sprintf(" LIMIT %v", f.limit)
+	}
+	// offset
+	log.Info(f.offset)
+	if f.offset > 0 {
+		if f.limit <= 0 {
+			// default limit
+			sql += fmt.Sprintf(" LIMIT %v", 10)
+		}
+		sql += fmt.Sprintf(" OFFSET %v", f.offset)
+	}
 	// query
 	log.Info(sql)
 	tx, err := f.db.Begin()
@@ -120,6 +135,9 @@ func (f *filterSet) All() []interface{} {
 	return result
 }
 
-func (f *filterSet) Offset(int) orm.FilterSet {
+func (f *filterSet) Offset(offset int) orm.FilterSet {
+	if offset > 0 {
+		f.offset = offset
+	}
 	return f
 }

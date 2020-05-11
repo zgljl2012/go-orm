@@ -346,4 +346,17 @@ func TestFilterSet(t *testing.T) {
 	if user1.ID != 10 {
 		t.Errorf("ID of this user should be 10, but got %v", user1.ID)
 	}
+
+	// limit
+	rows = table.Filter().Limit(5).All()
+	if len(rows) != 5 {
+		t.Errorf("rows'cnt should be 5, but got %v", len(rows))
+	}
+
+	// offset
+	rows = table.Filter().Offset(2).All()
+	if rows[0].(User).ID != 3 {
+		t.Errorf("expected 3, but got %v", rows[0].(User).ID)
+	}
+
 }
