@@ -28,15 +28,17 @@ type Table interface {
 
 // QueryParameter for filter
 type QueryParameter struct {
-	Name  string
-	Value interface{}
+	Name     string
+	Value    interface{}
+	Operator string // 操作符
 }
 
 // WithParameter create paramter pair
 func WithParameter(name string, value interface{}) *QueryParameter {
 	return &QueryParameter{
-		Name:  name,
-		Value: value,
+		Name:     name,
+		Value:    value,
+		Operator: "=",
 	}
 }
 

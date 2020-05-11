@@ -301,4 +301,18 @@ func TestFilterSet(t *testing.T) {
 		}
 	}
 
+	// filter with id=1
+	if filter, err := table.Filter(orm.WithParameter("ID", 1)); err != nil {
+		t.Error(err)
+	} else {
+		rows := filter.All()
+		if len(rows) != 1 {
+			t.Error("You should only filter one row")
+		}
+		user1 := rows[0].(User)
+		if user1.ID != 1 {
+			t.Errorf("Expect id is 1, but got %v", user1.ID)
+		}
+	}
+
 }

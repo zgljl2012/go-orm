@@ -241,7 +241,7 @@ func (t *simpleTable) Update(instance interface{}) error {
 	return nil
 }
 
-func (t *simpleTable) Filter(...*orm.QueryParameter) (orm.FilterSet, error) {
+func (t *simpleTable) Filter(filters ...*orm.QueryParameter) (orm.FilterSet, error) {
 	// validate parameters
-	return newFilterSet(t.db, t.Name(), t.table), nil
+	return newFilterSet(t.db, t.Name(), t.table).Filter(filters...), nil
 }
