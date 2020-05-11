@@ -60,7 +60,7 @@ func (f *filterSet) All() []interface{} {
 	if len(f.parameters) > 0 {
 		sql += " WHERE "
 		for _, parameter := range f.parameters {
-			names = append(names, parameter.Name+"=?")
+			names = append(names, parameter.Name+" "+parameter.Operator+" ?")
 			values = append(values, parameter.Value)
 		}
 		sql += strings.Join(names, ",")
