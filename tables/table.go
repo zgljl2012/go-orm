@@ -130,6 +130,38 @@ func (t *simpleTable) Add(instance interface{}) error {
 
 // Delete
 func (t *simpleTable) Delete(instance interface{}) error {
+	// get primary keys
+	primaryKeys, primaryValues := t.ParseInstance(instance, true)
+	for i, key := range primaryKeys {
+		primaryKeys[i] = fmt.Sprintf("%s=?", key)
+	}
+	sql := "DELETE FROM " + t.Name() + " WHERE " + strings.Join(primaryKeys, ",")
+
+	log.Info(sql)
+
+	tx, err := t.db.Begin()
+	if err != nil {
+		log.Error(err)
+		return err
+	}
+	stmt, err := tx.Prepare(sql)
+	if err != nil {
+		log.Error(err)
+		return err
+	}
+	if _, err := stmt.Exec(primaryValues...); err != nil {
+		log.Error(err)
+		return err
+	}
+	if err := tx.Commit(); err != nil {
+		log.Error(err)
+		return err
+	}
+	if err := stmt.Close(); err != nil {
+		log.Error(err)
+		return err
+	}
+
 	return nil
 }
 

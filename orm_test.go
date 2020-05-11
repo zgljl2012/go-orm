@@ -191,6 +191,20 @@ func TestAddUpdateDelete(t *testing.T) {
 		checkUser(t, db, table, &user)
 	}
 
+	// delete
+	if err := table.Delete(&user); err != nil {
+		t.Error(err)
+	} else {
+		// count should be zero
+		if cnt, err := table.Count(&user); err != nil {
+			t.Error(err)
+		} else {
+			if cnt != 0 {
+				t.Errorf("count of user should be zero, but got %v", cnt)
+			}
+		}
+	}
+
 }
 
 func checkUser(t *testing.T, db *sql.DB, table orm.Table, expect *User) {
