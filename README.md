@@ -91,6 +91,7 @@ func (u *User) Fields() []orm.Field {
 	}
 }
 
+// create test db
 func createTestDatabase() *sql.DB {
 	db, err := sql.Open("sqlite3", testDB)
 	if err != nil {
