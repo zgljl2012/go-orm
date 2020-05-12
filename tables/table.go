@@ -230,7 +230,7 @@ func (t *simpleTable) Update(instance interface{}) error {
 	// sql
 	sql := "UPDATE " + t.Name() + " SET "
 	sql += strings.Join(names, ",")
-	sql += " WHERE " + strings.Join(primaryKeys, ",")
+	sql += " WHERE " + strings.Join(primaryKeys, " AND ")
 
 	log.Debug(sql)
 
