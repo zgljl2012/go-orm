@@ -185,7 +185,7 @@ func (t *simpleTable) Count(instance interface{}) (int, error) {
 	for i, name := range names {
 		names[i] = fmt.Sprintf("%s=?", name)
 	}
-	sql += strings.Join(names, ",")
+	sql += strings.Join(names, " AND ")
 	log.Debug(sql)
 	tx, err := t.db.Begin()
 	if err != nil {
