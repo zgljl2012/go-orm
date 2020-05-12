@@ -14,6 +14,8 @@ const (
 	BOOL
 	// DATETIME datetime
 	DATETIME
+	// UINT64 big int(Uint64)
+	UINT64
 )
 
 func (t Type) String() string {
@@ -28,6 +30,8 @@ func (t Type) String() string {
 		return "BOOL"
 	case DATETIME:
 		return "DATETIME"
+	case UINT64:
+		return "BIGINT"
 	}
 	return ""
 }

@@ -27,6 +27,7 @@ type User struct {
 	Active    bool
 	Age       float32
 	CreatedAt time.Time
+	Count     uint64
 }
 
 // Fields return all fields to want to bind with database
@@ -38,6 +39,7 @@ func (u *User) Fields() []orm.Field {
 		fields.NewBoolField("Active", fields.WithNull(false)),
 		fields.NewFloatField("Age"),
 		fields.NewDatetimeField("CreatedAt"),
+		fields.NewUInt64Field("Count"),
 	}
 }
 
@@ -142,6 +144,12 @@ func TestCreateTable(t *testing.T) {
 			"Age": {
 				"exists": false,
 				"type":   "FLOAT",
+				"pk":     false,
+				"null":   true,
+			},
+			"Count": {
+				"exists": false,
+				"type":   "BIGINT",
 				"pk":     false,
 				"null":   true,
 			},

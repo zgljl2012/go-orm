@@ -32,6 +32,11 @@ func NewIntField(name string, opts ...FieldOption) orm.Field {
 	return newFiled(name, INT, opts...)
 }
 
+// NewUInt64Field new an uint64 field
+func NewUInt64Field(name string, opts ...FieldOption) orm.Field {
+	return newFiled(name, UINT64, opts...)
+}
+
 // NewBoolField new a bool field
 func NewBoolField(name string, opts ...FieldOption) orm.Field {
 	return newFiled(name, BOOL, opts...)
