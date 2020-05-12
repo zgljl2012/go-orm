@@ -245,3 +245,11 @@ func (t *simpleTable) Filter(filters ...*orm.QueryParameter) orm.FilterSet {
 	// validate parameters
 	return newFilterSet(t.db, t.Name(), t.table).Filter(filters...)
 }
+
+func (t *simpleTable) Upsert(instance interface{}) error {
+	// check the row exists or not
+	if err := t.Exists(instance); err == nil {
+		return t.Update(instance)
+	}
+	return t.Add(instance)
+}

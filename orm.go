@@ -15,6 +15,8 @@ type Table interface {
 	Name() string
 	// Add
 	Add(instance interface{}) error
+	// Upsert add or update
+	Upsert(instance interface{}) error
 	// Delete operate will delete via primary keys
 	Delete(instance interface{}) error
 	// Update operate will select those row via primary keys, then update other fields.
