@@ -86,7 +86,6 @@ func (f *filterSet) All() []interface{} {
 		sql += fmt.Sprintf(" LIMIT %v", f.limit)
 	}
 	// offset
-	log.Info(f.offset)
 	if f.offset > 0 {
 		if f.limit <= 0 {
 			// default limit
@@ -95,7 +94,7 @@ func (f *filterSet) All() []interface{} {
 		sql += fmt.Sprintf(" OFFSET %v", f.offset)
 	}
 	// query
-	log.Info(sql)
+	log.Debug(sql)
 	tx, err := f.db.Begin()
 	if err != nil {
 		log.Fatal("get tx error when iterate all rows", "err", err)
