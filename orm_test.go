@@ -3,6 +3,7 @@ package orm_test
 import (
 	"database/sql"
 	"fmt"
+	"reflect"
 	"time"
 
 	"os"
@@ -365,6 +366,25 @@ func TestFilterSet(t *testing.T) {
 	rows = table.Filter().Offset(2).All()
 	if rows[0].(User).ID != 3 {
 		t.Errorf("expected 3, but got %v", rows[0].(User).ID)
+	}
+
+}
+
+func TestStructTags(t *testing.T) {
+	a := struct {
+		A string `tag:"a" tag2:"true"`
+	}{
+		A: "hello",
+	}
+	_ = a
+	tp := reflect.TypeOf(a)
+	// get tags
+	for i := 0; i < tp.NumField(); i++ {
+		field := tp.Field(i)
+		tag := field.Tag.Get("tag")
+		t.Log(tag)
+		tag2 := field.Tag.Get("tag2")
+		t.Log(tag2)
 	}
 
 }
