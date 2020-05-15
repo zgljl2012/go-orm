@@ -28,6 +28,17 @@ func NewStructTagsTable(db *sql.DB, instance interface{}) (orm.Table, error) {
 		return nil, fmt.Errorf("There are no fields in your instance")
 	}
 
+	// iterate fields，report an error when do not have any primary key
+	havePrimaryKey := false
+	for _, field := range fields {
+		if field.PrimaryKey() {
+			havePrimaryKey = true
+		}
+	}
+	if !havePrimaryKey {
+		return nil, fmt.Errorf("Not found any primary keys")
+	}
+
 	return &simpleTable{
 		fields: fields,
 		db:     db,

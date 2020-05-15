@@ -70,8 +70,13 @@ func TestCreateTable(t *testing.T) {
 		Name string `name:"name"`
 	}{}); err == nil {
 		t.Fatal("should got an error, but is normal")
-	} else {
-		t.Log(err)
+	}
+
+	// do not have any primary key
+	if _, err := tables.NewStructTagsTable(db, &struct {
+		ID int `name:"id"`
+	}{}); err == nil {
+		t.Fatal("should got an error, but is normal")
 	}
 
 	// create table in database, name is the same as struct
