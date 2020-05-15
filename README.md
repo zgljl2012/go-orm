@@ -13,28 +13,23 @@ go get "github.com/zgljl2012/go-orm"
 
 ### Define Table
 
-You should implement `Field() []orm.Field` interface for your struct.
+You need to add tags for your field of the struct just like `json:"..."`. The `name` tag is required, if not specify `name` tag, the field won't be parsed as an orm.field.
+
+And you should specify the `length` tag for all of your `char` field or an error will be reported.
+
+The struct at least has one field that specifies `primaryKey` tag.
 
 ```golang
 
 // User is a test table
 type User struct {
-    ID        int
-    Username  string
-    Password  string
-    Active    bool
-    CreatedAt time.Time
-}
-
-// Fields return all fields to want to bind with database
-func (u *User) Fields() []orm.Field {
-    return []orm.Field{
-        fields.NewIntField("ID", fields.WithPrimaryKey(true), fields.WithNull(false)),
-        fields.NewCharField("Username", fields.WithLength(20)),
-        fields.NewCharField("Password", fields.WithLength(50)),
-        fields.NewBoolField("Active", fields.WithNull(false)),
-        fields.NewDatetimeField("CreatedAt"),
-    }
+    ID        int       `name:"id" primaryKey:"true"`
+    Username  string    `name:"username" length:"20"`
+    Password  string    `name:"password" length:"50"`
+    Active    bool      `name:"active" null:"false"`
+    Age       float32   `name:"age"`
+    CreatedAt time.Time `name:"created_at"`
+    Count     uint64    `name:"count"`
 }
 
 ```
@@ -46,6 +41,7 @@ Supported Type:
 + `Bool`
 + `Datetime`
 + `Char`
++ `Uint64` (`BigInt`)
 
 ### Create Table
 
@@ -73,22 +69,13 @@ var (
 
 // User is a test table
 type User struct {
-    ID        int
-    Username  string
-    Password  string
-    Active    bool
-    CreatedAt time.Time
-}
-
-// Fields return all fields to want to bind with database
-func (u *User) Fields() []orm.Field {
-    return []orm.Field{
-        fields.NewIntField("ID", fields.WithPrimaryKey(true), fields.WithNull(false)),
-        fields.NewCharField("Username", fields.WithLength(20)),
-        fields.NewCharField("Password", fields.WithLength(50)),
-        fields.NewBoolField("Active", fields.WithNull(false)),
-        fields.NewDatetimeField("CreatedAt"),
-    }
+    ID        int       `name:"id" primaryKey:"true"`
+    Username  string    `name:"username" length:"20"`
+    Password  string    `name:"password" length:"50"`
+    Active    bool      `name:"active" null:"false"`
+    Age       float32   `name:"age"`
+    CreatedAt time.Time `name:"created_at"`
+    Count     uint64    `name:"count"`
 }
 
 // create test db
@@ -112,7 +99,7 @@ func TestCreateTable(t *testing.T) {
     defer deleteTestDatabase()
 
     // create user table instance
-    table, err := tables.NewTable(db, &User{})
+    table, err := tables.NewStructTagsTable(db, &User{})
     if err != nil {
         t.Fatal(err)
     }
@@ -134,7 +121,7 @@ func TestAddUpdateDelete(t *testing.T) {
     defer deleteTestDatabase()
 
     // create user table instance
-    table, err := tables.NewTable(db, &User{})
+    table, err := tables.NewStructTagsTable(db, &User{})
     if err != nil {
         t.Fatal(err)
     }
@@ -190,7 +177,7 @@ func TestFilterSet(t *testing.T) {
     defer deleteTestDatabase()
 
     // create user table instance
-    table, err := tables.NewTable(db, &User{})
+    table, err := tables.NewStructTagsTable(db, &User{})
     if err != nil {
         t.Fatal(err)
     }
