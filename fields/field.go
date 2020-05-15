@@ -44,7 +44,7 @@ func parseFieldOptions(field reflect.StructField) ([]FieldOption, error) {
 			_type: reflect.Bool,
 		},
 		{
-			tag:   "primaryKey",
+			tag:   "null",
 			_type: reflect.Bool,
 		},
 		{
@@ -69,7 +69,7 @@ func parseFieldOptions(field reflect.StructField) ([]FieldOption, error) {
 				if value == "true" {
 					options = append(options, WithNull(true))
 				} else if value == "false" {
-					options = append(options, WithNull(true))
+					options = append(options, WithNull(false))
 				}
 			}
 		}
@@ -98,15 +98,23 @@ func ParseStructWithTagsToFields(instance interface{}) ([]orm.Field, error) {
 				return nil, err
 			}
 			// TODO: 如果 Field 的类型是 String，但不包含 length tag 就报错
+			var f orm.Field
 			if kind == reflect.Int {
-				f := newFiled(field.Name, name, INT, options...)
-				results = append(results, f)
+				f = newFiled(field.Name, name, INT, options...)
+			} else if kind == reflect.Uint64 {
+				f = newFiled(field.Name, name, UINT64, options...)
 			} else if kind == reflect.String {
-				f := newFiled(field.Name, name, CHAR, options...)
-				results = append(results, f)
+				f = newFiled(field.Name, name, CHAR, options...)
+			} else if kind == reflect.Bool {
+				f = newFiled(field.Name, name, BOOL, options...)
+			} else if kind == reflect.Float32 {
+				f = newFiled(field.Name, name, FLOAT, options...)
+			} else if kind == reflect.Struct && field.Type.String() == "time.Time" {
+				f = newFiled(field.Name, name, DATETIME, options...)
 			} else {
-				return nil, fmt.Errorf(`Unsupport type "%s" of field "%s"`, kind, field.Name)
+				return nil, fmt.Errorf(`Unsupport type "%s - %s" of field "%s"`, field.Type, kind, field.Name)
 			}
+			results = append(results, f)
 		}
 	}
 	return results, nil

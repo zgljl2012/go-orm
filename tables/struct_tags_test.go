@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"testing"
+	"time"
 
 	_ "github.com/mattn/go-sqlite3"
 	"github.com/zgljl2012/go-orm"
@@ -34,14 +35,13 @@ func deleteTestDatabase() {
 
 // User is a test table
 type User struct {
-	ID       int    `name:"id" primaryKey:"true"`
-	A        int    // just a test field
-	Username string `name:"username" length:"20"`
-	Password string `name:"password" length:"50"`
-	Active   bool
-	// Age       float32
-	// CreatedAt time.Time
-	// Count     uint64
+	ID        int       `name:"id" primaryKey:"true"`
+	Username  string    `name:"username" length:"20"`
+	Password  string    `name:"password" length:"50"`
+	Active    bool      `name:"active" null:"false"`
+	Age       float32   `name:"age"`
+	CreatedAt time.Time `name:"created_at"`
+	Count     uint64    `name:"count"`
 }
 
 func TestCreateTable(t *testing.T) {
@@ -106,30 +106,30 @@ func TestCreateTable(t *testing.T) {
 				"pk":     false,
 				"null":   true,
 			},
-			// "Active": {
-			// 	"exists": false,
-			// 	"type":   "BOOL",
-			// 	"pk":     false,
-			// 	"null":   false,
-			// },
-			// "CreatedAt": {
-			// 	"exists": false,
-			// 	"type":   "DATETIME",
-			// 	"pk":     false,
-			// 	"null":   true,
-			// },
-			// "Age": {
-			// 	"exists": false,
-			// 	"type":   "FLOAT",
-			// 	"pk":     false,
-			// 	"null":   true,
-			// },
-			// "Count": {
-			// 	"exists": false,
-			// 	"type":   "BIGINT",
-			// 	"pk":     false,
-			// 	"null":   true,
-			// },
+			"active": {
+				"exists": false,
+				"type":   "BOOL",
+				"pk":     false,
+				"null":   false,
+			},
+			"created_at": {
+				"exists": false,
+				"type":   "DATETIME",
+				"pk":     false,
+				"null":   true,
+			},
+			"age": {
+				"exists": false,
+				"type":   "FLOAT",
+				"pk":     false,
+				"null":   true,
+			},
+			"count": {
+				"exists": false,
+				"type":   "BIGINT",
+				"pk":     false,
+				"null":   true,
+			},
 		}
 
 		for result.Next() {
