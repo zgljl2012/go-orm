@@ -244,7 +244,7 @@ func (t *simpleTable) Update(instance interface{}) error {
 
 func (t *simpleTable) Filter(filters ...*orm.QueryParameter) orm.FilterSet {
 	// validate parameters
-	return newFilterSet(t.db, t.Name(), t.table).Filter(filters...)
+	return newFilterSet(t.db, t.Name(), t.table, t.fields).Filter(filters...)
 }
 
 func (t *simpleTable) Upsert(instance interface{}) error {

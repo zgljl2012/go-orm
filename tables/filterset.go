@@ -18,9 +18,10 @@ type filterSet struct {
 	parameters []*orm.QueryParameter
 	order      []string
 	db         *sql.DB
+	fields     []orm.Field
 }
 
-func newFilterSet(db *sql.DB, table string, instance interface{}) orm.FilterSet {
+func newFilterSet(db *sql.DB, table string, instance interface{}, fields []orm.Field) orm.FilterSet {
 	return &filterSet{
 		instance:   instance,
 		db:         db,
@@ -28,6 +29,7 @@ func newFilterSet(db *sql.DB, table string, instance interface{}) orm.FilterSet 
 		limit:      0,
 		offset:     0,
 		parameters: []*orm.QueryParameter{},
+		fields:     fields,
 	}
 }
 
@@ -110,10 +112,10 @@ func (f *filterSet) All() []interface{} {
 		for rows.Next() {
 			// new instance
 			obj := reflect.New(reflect.TypeOf(f.instance).Elem()).Elem()
-			numCols := reflect.TypeOf(f.instance).Elem().NumField()
+			numCols := len(f.fields)
 			columns := make([]interface{}, numCols)
 			for i := 0; i < numCols; i++ {
-				field := obj.Field(i)
+				field := obj.FieldByName(f.fields[i].ID())
 				columns[i] = field.Addr().Interface()
 			}
 			if err := rows.Scan(columns...); err != nil {
