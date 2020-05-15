@@ -2,6 +2,7 @@ package orm
 
 // Field field interface
 type Field interface {
+	ID() string       // name in struct
 	Name() string     // name
 	Type() string     // the type of this field, e.g. int, float
 	PrimaryKey() bool // primary key

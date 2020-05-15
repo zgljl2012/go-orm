@@ -161,7 +161,7 @@ func (t *simpleTable) parseInstance(instance interface{}, justPrimaryKeys bool) 
 	for _, field := range t.fields {
 		if !justPrimaryKeys || field.PrimaryKey() {
 			names = append(names, field.Name())
-			value := reflect.ValueOf(instance).Elem().FieldByName(field.Name()).Interface()
+			value := reflect.ValueOf(instance).Elem().FieldByName(field.ID()).Interface()
 			values = append(values, value)
 			params = append(params, "?")
 		}
