@@ -33,45 +33,76 @@ func newFiled(id string, name string, _type Type, opts ...FieldOption) orm.Field
 	}
 }
 
+type valueValidator func(string) error
+
 // parseFieldOptions parse options
 func parseFieldOptions(field reflect.StructField) ([]FieldOption, error) {
+	boolValidator := func(value string) error {
+		if value != "true" && value != "false" {
+			return fmt.Errorf(`can't support "%v" for bool field`, value)
+		}
+		return nil
+	}
 	tags := []struct {
-		tag   string       // tag
-		_type reflect.Kind // type
+		tag        string                         // tag
+		_type      reflect.Kind                   // type
+		fun        func(value string) FieldOption // handler
+		validators []valueValidator
 	}{
 		{
 			tag:   "primaryKey",
 			_type: reflect.Bool,
+			validators: []valueValidator{
+				boolValidator,
+			},
+			fun: func(value string) FieldOption {
+				return func(options *FieldOptions) {
+					options.PrimaryKey = value == "true"
+				}
+			},
 		},
 		{
 			tag:   "null",
 			_type: reflect.Bool,
+			fun: func(value string) FieldOption {
+				return func(options *FieldOptions) {
+					options.Null = value == "true"
+				}
+			},
 		},
 		{
 			tag:   "length",
 			_type: reflect.Int,
+			fun: func(value string) FieldOption {
+				return func(options *FieldOptions) {
+					val, _ := strconv.Atoi(value)
+					options.Length = val
+				}
+			},
+			validators: []valueValidator{
+				func(value string) error {
+					_, err := strconv.Atoi(value)
+					if err != nil {
+						return fmt.Errorf(`parse length tag error, field: "%s", length: "%s", err: "%s"`,
+							field.Name, value, err)
+					}
+					return nil
+				},
+			},
 		},
 	}
 	options := []FieldOption{}
 	for _, tag := range tags {
 		value := field.Tag.Get(tag.tag)
 		if value != "" {
-			if tag._type == reflect.Bool && value == "true" && tag.tag == "primaryKey" {
-				options = append(options, WithPrimaryKey(true))
-			} else if tag._type == reflect.Int && tag.tag == "length" {
-				length, err := strconv.Atoi(value)
-				if err != nil {
-					return nil, fmt.Errorf(`parse length tag error, field: "%s", length: "%s", err: "%s"`,
-						field.Name, value, err)
-				}
-				options = append(options, WithLength(length))
-			} else if tag._type == reflect.Bool && tag.tag == "null" {
-				if value == "true" {
-					options = append(options, WithNull(true))
-				} else if value == "false" {
-					options = append(options, WithNull(false))
+			if tag.validators != nil {
+				for _, validator := range tag.validators {
+					if err := validator(value); err != nil {
+						return nil, err
+					}
 				}
 			}
+			options = append(options, tag.fun(value))
 		}
 	}
 	return options, nil
