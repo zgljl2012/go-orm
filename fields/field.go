@@ -128,13 +128,16 @@ func ParseStructWithTagsToFields(instance interface{}) ([]orm.Field, error) {
 			if err != nil {
 				return nil, err
 			}
-			// TODO: 如果 Field 的类型是 String，但不包含 length tag 就报错
 			var f orm.Field
 			if kind == reflect.Int {
 				f = newFiled(field.Name, name, INT, options...)
 			} else if kind == reflect.Uint64 {
 				f = newFiled(field.Name, name, UINT64, options...)
 			} else if kind == reflect.String {
+				// TODO: 如果 Field 的类型是 String，但不包含 length tag 就报错
+				if _, ok := field.Tag.Lookup("length"); !ok {
+					return nil, fmt.Errorf(`Char field "%s" need specify the length tag`, field.Name)
+				}
 				f = newFiled(field.Name, name, CHAR, options...)
 			} else if kind == reflect.Bool {
 				f = newFiled(field.Name, name, BOOL, options...)

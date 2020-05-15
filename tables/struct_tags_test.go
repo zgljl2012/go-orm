@@ -64,6 +64,16 @@ func TestCreateTable(t *testing.T) {
 		t.Fatal("should got an error, but is normal")
 	}
 
+	// table's do have wrong fields with name tag but a field is wrong
+	// char field need specify length
+	if _, err := tables.NewStructTagsTable(db, &struct {
+		Name string `name:"name"`
+	}{}); err == nil {
+		t.Fatal("should got an error, but is normal")
+	} else {
+		t.Log(err)
+	}
+
 	// create table in database, name is the same as struct
 	if err := table.Create(false); err != nil {
 		t.Error(err)
