@@ -42,8 +42,12 @@ func parseWithParameters(field reflect.StructField) ([]fields.FieldOption, error
 						field.Name, value, err)
 				}
 				options = append(options, fields.WithLength(length))
-			} else if tag._type == reflect.Bool && value != "true" && tag.tag == "null" {
-				options = append(options, fields.WithNull(false))
+			} else if tag._type == reflect.Bool && tag.tag == "null" {
+				if value == "true" {
+					options = append(options, fields.WithNull(true))
+				} else if value == "false" {
+					options = append(options, fields.WithNull(true))
+				}
 			}
 		}
 	}
@@ -84,10 +88,6 @@ func parseStructTags(instance interface{}) ([]orm.Field, error) {
 	return results, nil
 }
 
-type structTagsTable struct {
-	fields []orm.Field
-}
-
 // NewStructTagsTable new a table with tags
 func NewStructTagsTable(db *sql.DB, instance interface{}) (orm.Table, error) {
 	t := reflect.TypeOf(instance)
@@ -107,48 +107,10 @@ func NewStructTagsTable(db *sql.DB, instance interface{}) (orm.Table, error) {
 		return nil, fmt.Errorf("There are no fields in your instance")
 	}
 
-	return &structTagsTable{
+	return &simpleTable{
 		fields: fields,
+		db:     db,
+		table:  instance,
+		name:   reflect.TypeOf(reflect.Indirect(reflect.ValueOf(instance)).Interface()).Name(),
 	}, nil
-}
-
-// create the table automatically, you can pass a parameter to skip creation if the table is exists
-func (t *structTagsTable) Create(skipIfExists bool) error {
-	return nil
-}
-
-// Table name that automatically created by orm
-func (t *structTagsTable) Name() string {
-	return ""
-}
-
-// Add
-func (t *structTagsTable) Add(instance interface{}) error {
-	return nil
-}
-
-// Upsert add or update
-func (t *structTagsTable) Upsert(instance interface{}) error {
-	return nil
-}
-
-// Delete operate will delete via primary keys
-func (t *structTagsTable) Delete(instance interface{}) error {
-	return nil
-}
-
-// Update operate will select those row via primary keys, then update other fields.
-// So your should be sure of your primary keys won't be updated.
-func (t *structTagsTable) Update(instance interface{}) error {
-	return nil
-}
-
-// Filter rows
-func (t *structTagsTable) Filter(...*orm.QueryParameter) orm.FilterSet {
-	return nil
-}
-
-// Count get the counts
-func (t *structTagsTable) Count(instance interface{}) (int, error) {
-	return 0, nil
 }

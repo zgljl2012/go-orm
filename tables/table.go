@@ -22,8 +22,10 @@ const (
 )
 
 type simpleTable struct {
-	db    *sql.DB
-	table interface{}
+	db     *sql.DB
+	fields []orm.Field
+	table  interface{}
+	name   string
 }
 
 // NewTable create a table instance, you can input every struct.
@@ -43,8 +45,10 @@ func NewTable(db *sql.DB, table interface{}) (orm.Table, error) {
 		return nil, fmt.Errorf(ErrTableNotImplementModelFields)
 	}
 	return &simpleTable{
-		db:    db,
-		table: table,
+		db:     db,
+		table:  table,
+		fields: table.(orm.ModelFields).Fields(),
+		name:   reflect.TypeOf(reflect.Indirect(reflect.ValueOf(table)).Interface()).Name(),
 	}, nil
 }
 
@@ -57,11 +61,10 @@ func (t *simpleTable) Create(skipIfExists bool) error {
 	sql += t.Name()
 	sql += `(`
 	// iterate fields
-	fields := t.table.(orm.ModelFields).Fields()
-	for i, field := range fields {
+	for i, field := range t.fields {
 		log.Debug("iterare field", "table", t.Name(), "field", field.Name(), "type", field.Type())
 		sql += fmt.Sprintf(`%s %s`, field.Name(), field.Type())
-		if i < len(fields)-1 {
+		if i < len(t.fields)-1 {
 			sql += ","
 		}
 		if field.PrimaryKey() {
@@ -75,7 +78,7 @@ func (t *simpleTable) Create(skipIfExists bool) error {
 		sql += ")"
 	}
 	sql += `)`
-	log.Debug(sql)
+	log.Info(sql)
 	if _, err := t.db.Exec(sql); err != nil {
 		return err
 	}
@@ -83,8 +86,7 @@ func (t *simpleTable) Create(skipIfExists bool) error {
 }
 
 func (t *simpleTable) Name() string {
-	name := reflect.TypeOf(reflect.Indirect(reflect.ValueOf(t.table)).Interface()).Name()
-	return name
+	return t.name
 }
 
 func (t *simpleTable) exec(sql string, values []interface{}) error {
@@ -152,12 +154,11 @@ func (t *simpleTable) Delete(instance interface{}) error {
 
 func (t *simpleTable) parseInstance(instance interface{}, justPrimaryKeys bool) ([]string, []interface{}) {
 	// fields
-	fields := instance.(orm.ModelFields).Fields()
 	names := []string{}
 	values := []interface{}{}
 	params := []string{}
 	_ = values
-	for _, field := range fields {
+	for _, field := range t.fields {
 		if !justPrimaryKeys || field.PrimaryKey() {
 			names = append(names, field.Name())
 			value := reflect.ValueOf(instance).Elem().FieldByName(field.Name()).Interface()

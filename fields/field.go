@@ -67,9 +67,9 @@ func (f *myField) Type() string {
 	} else {
 		t = f._type.String()
 	}
-	if !f.options.Null {
+	if !f.options.Null || f.PrimaryKey() {
 		t += " NOT NULL"
-	} else {
+	} else if !f.PrimaryKey() {
 		t += " NULL"
 	}
 	return t
